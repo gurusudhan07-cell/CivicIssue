@@ -1,0 +1,217 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CivicLens | See it. Report it. Fixed.</title>
+<meta name="description" content="CivicLens turns one citizen photo into a ranked, mapped and tracked work order so city teams fix the worst problems first.">
+<meta property="og:title" content="CivicLens | See it. Report it. Fixed."><meta property="og:description" content="AI-powered civic issue detection, prioritisation, hotspot mapping and public transparency.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='44' fill='%230e7490'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23f97316'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap">
+<style>
+:root{--bg:#eaf0f5;--card:#fff;--tx:#0c1c2c;--mu:#5b6b7c;--bd:#d5dee8;--ac:#0e7490;--or:#f97316;--er:#dc2626;--ok:#16a34a}
+:root[data-theme=dark]{--bg:#08131f;--card:#0f2033;--tx:#e6eef6;--mu:#8ea3b8;--bd:#1c3349;--ac:#22d3ee}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Space Grotesk",system-ui,sans-serif;margin:0;letter-spacing:-.02em}
+button{font:inherit;cursor:pointer;color:inherit}:focus-visible{outline:2px solid var(--or);outline-offset:2px}
+/* landing */
+#land{background:#06121e;color:#eaf3fa}#app{display:none}
+.top{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px clamp(16px,4vw,48px);backdrop-filter:blur(14px);background:#06121ecc;border-bottom:1px solid #ffffff14}
+.logo{display:flex;gap:10px;align-items:center;font:700 22px "Space Grotesk";cursor:pointer}
+.logo i{width:34px;height:34px;border-radius:10px;background:conic-gradient(from 200deg,#22d3ee,#f97316,#22d3ee);display:grid;place-items:center;font-style:normal;color:#fff}
+.lk{display:flex;gap:24px;align-items:center}.lk button.l{background:none;border:0;color:#a9bdd0;font-size:14px}.lk button.l:hover{color:#fff}@media(max-width:860px){.lk button.l{display:none}}
+.b{border:1px solid transparent;border-radius:999px;padding:12px 24px;font-weight:600;background:#f97316;color:#fff;transition:transform .25s,box-shadow .25s}.b:hover{transform:translateY(-3px);box-shadow:0 10px 28px #f9731666}.b.g{background:#ffffff14;border:1px solid #ffffff33}.b.s{padding:9px 18px;font-size:14px}
+.hw{position:relative;overflow:hidden}.bgw{position:absolute;inset:0;pointer-events:none}
+.bl{position:absolute;border-radius:50%;filter:blur(90px);opacity:.4;animation:fl 12s ease-in-out infinite alternate}@keyframes fl{to{transform:translate(70px,-50px) scale(1.25)}}
+.hero{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:44px;align-items:center;max-width:1240px;margin:0 auto;min-height:calc(100vh - 62px);padding:40px clamp(16px,4vw,48px)}
+@media(max-width:940px){.hero{grid-template-columns:1fr;text-align:center}.hero .cta,.hero .bd{justify-content:center}}
+.bd{display:inline-flex;gap:8px;align-items:center;border:1px solid #ffffff2a;border-radius:999px;padding:6px 14px;font-size:13px;color:#a9bdd0;background:#ffffff0a;margin-bottom:18px}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 0 #22c55e;animation:pu 2s infinite}@keyframes pu{70%{box-shadow:0 0 0 9px #22c55e00}}
+.hero h1{font-size:clamp(40px,7vw,86px);line-height:1}
+.hero h1 span{display:inline-block;opacity:0;transform:translateY(46px);animation:up .9s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*.2s + .15s)}.hero h1 span:last-child{color:#f97316}
+@keyframes up{to{opacity:1;transform:none}}
+.hero p.sub{font-size:clamp(16px,1.8vw,19px);color:#a9bdd0;max-width:34em;margin:22px 0;opacity:0;animation:up .9s .9s forwards}@media(max-width:940px){.hero p.sub{margin:22px auto}}
+.cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center;opacity:0;animation:up .9s 1.1s forwards}
+.pv{background:#0b1a2a;border:1px solid #ffffff1f;border-radius:20px;padding:14px;box-shadow:0 30px 80px #0008;position:relative;animation:fy 6s ease-in-out infinite alternate;text-align:left}@keyframes fy{to{transform:translateY(-14px)}}
+.pv .h{display:flex;gap:6px;margin-bottom:10px}.pv .h i{width:9px;height:9px;border-radius:50%;background:#ffffff33}
+.pk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.pk div{background:#0f2033;border-radius:10px;padding:8px 10px;font-size:11px;color:#8ea3b8}.pk b{display:block;font:700 20px "Space Grotesk";color:#eaf3fa}
+.pm{height:230px;border-radius:12px;position:relative;overflow:hidden;background:#12324a;background-image:linear-gradient(#ffffff0f 1px,transparent 1px),linear-gradient(90deg,#ffffff0f 1px,transparent 1px);background-size:34px 34px}
+.pm .r{position:absolute;left:-10%;top:55%;width:120%;height:10px;background:#ffffff14;transform:rotate(-18deg)}.pm .r2{top:30%;transform:rotate(24deg)}
+.pd{position:absolute;width:12px;height:12px;border-radius:50%;border:2px solid #fff;animation:pd 2.4s infinite}@keyframes pd{0%{box-shadow:0 0 0 0 #f9731699}100%{box-shadow:0 0 0 18px #f9731600}}
+.nt{position:absolute;background:#0f2033f2;border:1px solid #ffffff26;border-radius:12px;padding:8px 12px;font-size:12px;box-shadow:0 10px 30px #0006;animation:fy 4s ease-in-out infinite alternate}
+.strip{border-top:1px solid #ffffff14;border-bottom:1px solid #ffffff14;color:#8ea3b8;text-align:center;padding:18px;font-size:14px;letter-spacing:.02em}
+.sec{max-width:1160px;margin:0 auto;padding:90px 20px}.sec h2{font-size:clamp(28px,4.4vw,46px);max-width:17em;margin-bottom:12px}.sec .ey{color:#f97316;font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}.sec p.in{color:#a9bdd0;max-width:40em;margin:0 0 34px}
+.js .rv{opacity:0;transform:translateY(34px);transition:opacity .9s,transform .9s cubic-bezier(.2,.8,.2,1)}.js .rv.in{opacity:1;transform:none}
+.gr{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.lc{background:#ffffff0d;border:1px solid #ffffff1f;border-radius:20px;padding:24px;transition:transform .3s,border-color .3s}.lc:hover{transform:translateY(-6px);border-color:#f97316}
+.lc i{font-style:normal;font-size:28px}.lc h3{margin:10px 0 6px;font-size:19px}.lc p,.lc li{margin:0;color:#a9bdd0}.lc ul{margin:0;padding-left:18px;display:grid;gap:6px}
+.stp{position:relative;border-top:2px solid #f97316;padding-top:16px}.stp b{font:700 14px "Space Grotesk";color:#f97316}.stp h3{margin:6px 0}.stp p{margin:0;color:#a9bdd0}
+.st{font:700 clamp(38px,6vw,64px) "Space Grotesk";color:#22d3ee;line-height:1.1}.sm{color:#a9bdd0}
+details{background:#ffffff0d;border:1px solid #ffffff1f;border-radius:14px;padding:16px 20px;margin-bottom:10px}summary{cursor:pointer;font-weight:600}details p{color:#a9bdd0;margin:10px 0 0}
+.ft{border-top:1px solid #ffffff14;color:#8ea3b8;text-align:center;padding:28px 20px;font-size:13px}
+/* app */
+.w{max-width:1240px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding:6px 0 16px}
+#app .logo i{color:#fff}
+nav#nav{display:flex;gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:999px;padding:4px;flex-wrap:wrap}
+nav#nav button{border:0;background:none;padding:8px 16px;border-radius:999px;font-weight:500;color:var(--mu);transition:.25s}nav#nav button.on{background:var(--ac);color:#fff}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px}
+.g{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin-bottom:14px}
+.k b{font:700 32px "Space Grotesk";display:block}.k span,.m{color:var(--mu);font-size:13px}
+.two{display:grid;gap:14px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}@media(max-width:900px){.two{grid-template-columns:1fr}}
+#mp,#rm{height:560px;border-radius:14px;margin-top:10px;z-index:0;background:var(--bd)}#rm{height:300px}
+.q{max-height:560px;overflow:auto;display:grid;gap:10px;padding-right:4px;margin-top:10px}
+.it{border:1px solid var(--bd);border-radius:14px;padding:12px;display:grid;gap:6px;cursor:pointer;transition:border-color .2s}.it:hover{border-color:var(--ac)}
+.t{display:flex;justify-content:space-between;gap:8px;font-weight:600}
+.sc{min-width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font:700 16px "Space Grotesk";color:#fff}
+.bt{border:0;border-radius:10px;background:var(--ac);color:#fff;padding:7px 12px;font-weight:500}.bt.o{background:var(--or)}.bt.l{background:none;border:1px solid var(--bd);color:var(--tx)}.bt[disabled]{opacity:.5;cursor:default}
+.tag{font-size:12px;border-radius:999px;padding:2px 10px;background:color-mix(in srgb,var(--ac) 16%,transparent);color:var(--ac);font-weight:600}.tag.r{background:#dc262622;color:var(--er)}
+input,select{font:inherit;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:8px}
+.fl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.drop{border:2px dashed var(--bd);border-radius:16px;min-height:170px;display:grid;place-items:center;text-align:center;padding:14px;position:relative;overflow:hidden;cursor:pointer;margin:10px 0}.drop img{max-width:100%;max-height:220px;border-radius:12px}
+.scan{position:absolute;left:0;right:0;height:3px;background:var(--or);box-shadow:0 0 18px 6px var(--or);animation:sc 1.4s ease-in-out infinite;display:none}.scanning .scan{display:block}@keyframes sc{0%,100%{top:0}50%{top:100%}}
+.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd);padding:6px 0}
+.bar{height:10px;border-radius:6px;background:var(--bd);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),var(--or));transition:width 1s}
+.tl{border-left:2px solid var(--bd);margin-left:6px;padding-left:14px;display:grid;gap:10px}
+.tab{display:none}.tab.on{display:block}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,120px);background:#0c1c2c;color:#fff;padding:10px 18px;border-radius:999px;transition:.4s;z-index:9999}.toast.on{transform:translate(-50%,0)}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition:none!important}}
+</style></head><body>
+
+<div id="land">
+<div class="top"><div class="logo" data-s="top"><i>◎</i>CivicLens</div><div class="lk"><button class="l" data-s="problem">Problem</button><button class="l" data-s="how">How it works</button><button class="l" data-s="features">Features</button><button class="l" data-s="faq">FAQ</button><button class="b s" data-go>Launch platform</button></div></div>
+<div class="hw"><div class="bgw"><div class="bl" style="width:480px;height:480px;background:#0e7490;left:-120px;top:-100px"></div><div class="bl" style="width:420px;height:420px;background:#f97316;right:-100px;bottom:-60px;animation-delay:-5s"></div></div>
+<div class="hero"><div><div class="bd"><span class="dot"></span>Smart city  ·  AI  ·  Open data</div>
+<h1><span style="--i:0">See it.</span> <span style="--i:1">Report it.</span> <span style="--i:2">Fixed.</span></h1>
+<p class="sub">CivicLens turns one citizen photo into a ranked, mapped and tracked work order, so city teams fix the worst problems first and everyone can watch it happen.</p>
+<div class="cta"><button class="b" data-go>Launch the platform</button><button class="b g" data-s="how">See how it works</button></div></div>
+<div class="pv" aria-hidden="true"><div class="h"><i></i><i></i><i></i></div><div class="pk"><div>Open<b>31</b></div><div>Critical<b style="color:#f97316">7</b></div><div>Resolved<b style="color:#22d3ee">15</b></div></div>
+<div class="pm"><div class="r"></div><div class="r r2"></div><span class="pd" style="left:24%;top:30%;background:#dc2626"></span><span class="pd" style="left:52%;top:55%;background:#f97316;animation-delay:.6s"></span><span class="pd" style="left:70%;top:25%;background:#f97316;animation-delay:1.2s"></span><span class="pd" style="left:38%;top:72%;background:#22d3ee;animation-delay:1.8s"></span>
+<div class="nt" style="left:8%;bottom:10%">🕳️ Pothole detected · Severity 4 · Roads</div><div class="nt" style="right:6%;top:8%;animation-delay:-2s">✔ Ticket resolved in 18 h</div></div></div></div></div>
+<div class="strip">Powered by open data: OpenStreetMap  ·  Open-Meteo  ·  Overpass API  ·  Nominatim  ·  CARTO  ·  Esri</div>
+
+<div class="sec" id="problem"><div class="ey rv">The problem</div><h2 class="rv">Cities do not lack complaints. They lack a way to tell which one matters most.</h2>
+<div class="gr"><div class="lc rv"><i>📨</i><h3>Scattered reports</h3><p>Calls, messages, forms and social posts reach different desks, so one pothole is logged ten times.</p></div><div class="lc rv"><i>⚖️</i><h3>No triage</h3><p>A flooded junction beside a hospital waits in the same line as a faded road marking.</p></div><div class="lc rv"><i>🕳️</i><h3>No visibility</h3><p>Residents never learn what happened, so trust falls and fewer people report.</p></div></div></div>
+
+<div class="sec" id="how"><div class="ey rv">How it works</div><h2 class="rv">From a photo to a fixed road in four steps</h2>
+<div class="gr"><div class="stp rv"><b>STEP 1</b><h3>Snap</h3><p>A resident photographs the issue and drops a pin or uses GPS.</p></div><div class="stp rv"><b>STEP 2</b><h3>Understand</h3><p>Vision AI names the issue, rates severity and rejects non-issues.</p></div><div class="stp rv"><b>STEP 3</b><h3>Prioritise</h3><p>Votes, age, rainfall and nearby schools or hospitals set the rank.</p></div><div class="stp rv"><b>STEP 4</b><h3>Resolve</h3><p>The owning department closes it and the audit trail is public.</p></div></div></div>
+
+<div class="sec" id="features"><div class="ey rv">Features</div><h2 class="rv">One platform for residents, officers and city leaders</h2>
+<div class="gr"><div class="lc rv"><i>📸</i><h3>AI issue detection</h3><p>Six issue types recognised from a single photo, with severity and a plain-language summary.</p></div><div class="lc rv"><i>🎯</i><h3>Transparent priority score</h3><p>A visible formula, so no complaint is buried by chance.</p></div><div class="lc rv"><i>🗺️</i><h3>Street-level hotspot map</h3><p>Map, satellite and dark views with heat zones and a hospital and school layer.</p></div><div class="lc rv"><i>🌧️</i><h3>Rain-aware ranking</h3><p>Live rainfall forecast lifts drainage and waterlogging tickets automatically.</p></div><div class="lc rv"><i>⏱️</i><h3>SLA clocks</h3><p>Every ticket has a deadline and turns red when it is missed.</p></div><div class="lc rv"><i>🔍</i><h3>Public tracker</h3><p>Department scorecard, ticket tracker, audit trail and CSV export.</p></div></div></div>
+
+<div class="sec"><div class="ey rv">Live in the prototype</div><h2 class="rv">Real map, real weather, real places. Simulated tickets.</h2>
+<div class="gr"><div class="rv"><div class="st" id="c1" data-n="0">0</div><div class="sm">open complaints on the map</div></div><div class="rv"><div class="st" id="c2" data-n="0">0</div><div class="sm">critical right now</div></div><div class="rv"><div class="st" id="c3" data-n="0">0</div><div class="sm">resolved so far</div></div></div>
+<div style="margin-top:30px" class="rv"><button class="b" data-go>Open the command centre</button></div></div>
+
+<div class="sec"><div class="ey rv">Who it serves</div><h2 class="rv">Built around three people</h2>
+<div class="gr"><div class="lc rv"><i>🧑</i><h3>Citizens</h3><ul><li>Report in under a minute</li><li>Upvote problems near you</li><li>Track every ticket by number</li></ul></div><div class="lc rv"><i>🧑‍🔧</i><h3>Field officers</h3><ul><li>Ranked daily work queue</li><li>One-tap status updates</li><li>Deadlines visible at a glance</li></ul></div><div class="lc rv"><i>🏛️</i><h3>City leaders</h3><ul><li>Hotspots by locality</li><li>Department scorecards</li><li>CSV export for review</li></ul></div></div></div>
+
+<div class="sec" id="faq"><div class="ey rv">FAQ</div><h2 class="rv">Straight answers</h2><div class="rv">
+<details><summary>Is the data real?</summary><p>The map, hospitals and schools, address lookup and weather are live open data. The complaint tickets in this prototype are simulated so every feature can be explored.</p></details>
+<details><summary>How does the AI work?</summary><p>The photo goes through a secure serverless route to a vision model, which returns the issue type, severity and a one-line description. Photos that are not civic issues are rejected.</p></details>
+<details><summary>How is priority calculated?</summary><p>Severity, citizen votes, complaint age, nearness to a hospital or school, and live rainfall for drainage issues are added into a score out of 99.</p></details>
+<details><summary>Can it work for another city?</summary><p>Yes. Only the locality list and department mapping are city specific.</p></details></div></div>
+
+<div class="sec" style="text-align:center"><h2 class="rv" style="margin:0 auto 24px">Better streets start with one tap.</h2><button class="b rv" data-go>Launch the platform</button></div>
+<div class="ft">CivicLens  ·  Hackathon prototype. Complaint records are simulated.</div></div>
+
+<div id="app"><div class="w">
+<header><div class="logo" id="home"><i>◎</i>CivicLens</div>
+<nav id="nav"><button class="on" data-t="d">Command centre</button><button data-t="r">Report an issue</button><button data-t="p">Public tracker</button></nav>
+<div class="fl"><span class="tag" id="wx">Loading weather…</span><button class="bt l" id="th">Theme</button><button class="bt l" id="bk">Home</button></div></header>
+
+<div class="tab on" id="d"><div class="g" id="kp"></div>
+<div class="two"><div class="c"><div class="fl" style="justify-content:space-between"><h3>Hotspot map: Chennai</h3><div class="fl"><select id="cf"></select><button class="bt l" id="ex">Export CSV</button></div></div><div id="mp"></div><div class="m" style="margin-top:8px">Use the layer control on the map for satellite, dark, heat zones and hospitals or schools. Click a queue item to fly to it.</div></div>
+<div class="c"><h3>Priority queue</h3><div class="fl" style="margin-top:8px"><input id="sq" placeholder="Search area or issue" style="flex:1;min-width:0"><select id="sf"><option>All</option><option>New</option><option>Assigned</option><option>In progress</option><option>Resolved</option></select></div><div class="q" id="qu"></div></div></div></div>
+
+<div class="tab" id="r"><div class="two"><div class="c"><h2>Report an issue</h2><p class="m">1. Add a photo. 2. Choose the location. 3. Submit.</p>
+<label class="drop" id="dp"><input type="file" accept="image/*" id="fi" hidden><div id="ph">Tap to add a photo<br><span class="m">Clear photos of potholes, garbage, flooding, streetlights or drains work best</span></div><div class="scan"></div></label>
+<div class="fl"><button class="bt l" id="gl">Use my location</button><select id="ls"><option value="">Or choose an area</option></select></div><div class="m" id="ad" style="margin:8px 0">No location chosen yet. You can also tap the map.</div><div id="rm"></div></div>
+<div class="c"><h3>AI analysis</h3><div id="rs" style="margin-top:8px"><span class="m">Waiting for a photo.</span></div><button class="bt o" id="sb" disabled style="margin-top:14px">Submit complaint</button></div></div></div>
+
+<div class="tab" id="p"><div class="two"><div class="c"><h2>Department scorecard</h2><div id="lb" style="display:grid;gap:14px;margin:12px 0 22px"></div><h3>Issue mix</h3><div id="mx" style="display:grid;gap:10px;margin:10px 0 22px"></div><h3>Hotspot localities</h3><div id="hw" style="display:grid;gap:10px;margin-top:10px"></div></div>
+<div class="c"><h3>Track a complaint</h3><div class="fl" style="margin:8px 0"><input id="ti" placeholder="Ticket number, e.g. 1004" style="flex:1;min-width:0"><button class="bt" id="tb">Track</button></div><div id="tr" class="m">Enter a ticket number to see its stages.</div><h3 style="margin-top:20px">Audit trail</h3><div class="tl" id="tl"><span class="m">No actions yet. Advance a complaint in the command centre.</span></div></div></div></div>
+</div></div><div class="toast" id="to"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+document.documentElement.classList.add("js");
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+function toast(t){const e=$("#to");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2400)}
+function count(el,v,suf=""){let t0;const f=t=>{t0=t0||t;const p=Math.min(1,(t-t0)/1100);el.textContent=Math.round(v*p)+suf;if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+let mp=null,rm=null,rmk=null,heat,pins,sites,mrk={},view="";
+/* routing and landing wiring first, so buttons always work */
+function route(){const a=location.hash==="#app",v=a?"a":"l";if(v===view)return;view=v;$("#land").style.display=a?"none":"block";$("#app").style.display=a?"block":"none";scrollTo(0,0);if(a){render(true);setTimeout(()=>{if(mp)mp.invalidateSize()},120)}}
+function go(){location.hash="app";route()}
+$$("[data-go]").forEach(b=>b.onclick=go);$("#bk").onclick=$("#home").onclick=()=>{location.hash="";route()};
+$$("[data-s]").forEach(b=>b.onclick=()=>{const t=b.dataset.s==="top"?document.body:document.getElementById(b.dataset.s);t.scrollIntoView({behavior:"smooth"})});
+addEventListener("hashchange",route);
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");const n=e.target.querySelector("[data-n]")||(e.target.dataset.n!==undefined?e.target:null);if(n)count(n,+n.dataset.n);io.unobserve(e.target)}}),{threshold:.2});$$(".rv").forEach(e=>io.observe(e));
+function tab(t){$$("#nav button").forEach(x=>x.classList.toggle("on",x.dataset.t===t));$$(".tab").forEach(x=>x.classList.toggle("on",x.id===t));if(t==="r")setTimeout(initRm,60);if(t==="d")setTimeout(()=>{if(mp)mp.invalidateSize()},60);if(t==="p")board()}
+$$("#nav button").forEach(b=>b.onclick=()=>tab(b.dataset.t));
+$("#th").onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==="dark"?"":"dark"};
+
+/* data */
+const AR=[["T. Nagar",13.0418,80.2341],["Adyar",13.0012,80.2565],["Velachery",12.9815,80.218],["Anna Nagar",13.085,80.2101],["Tambaram",12.9249,80.1],["Guindy",13.0067,80.2206],["Mylapore",13.0368,80.2676],["Perambur",13.121,80.233],["Porur",13.0382,80.1565],["Egmore",13.0732,80.2609],["Sholinganallur",12.901,80.2279],["Kodambakkam",13.0521,80.2255],["Royapuram",13.113,80.295]];
+const CT={"Pothole":["🕳️","Roads"],"Garbage":["🗑️","Solid waste"],"Waterlogging":["🌊","Storm water"],"Streetlight":["💡","Electrical"],"Broken drain":["🚧","Drainage"],"Illegal dumping":["♻️","Solid waste"]};
+const ST=["New","Assigned","In progress","Resolved"],K=Object.keys(CT);
+let s=7;const rnd=()=>(s=s*16807%2147483647)/2147483647;
+let D=[],id=1000,log=[],R=0,SITES=[],cur=null,loc=null;
+const mk=(an,la,lo,c,sev,v,age,st)=>({id:++id,an,la,lo,c,sev,v,age,st,near:rnd()>.7});
+for(let i=0;i<46;i++){const a=AR[Math.floor(rnd()*13)];D.push(mk(a[0],a[1]+(rnd()-.5)*.016,a[2]+(rnd()-.5)*.016,K[Math.floor(rnd()*6)],1+Math.floor(rnd()*5),Math.floor(rnd()*60),Math.floor(rnd()*96),ST[Math.floor(rnd()*rnd()*4)]))}
+const sc=c=>Math.min(99,Math.round(c.sev*13+Math.min(c.v,60)*.5+Math.min(c.age,72)*.3+(c.near?12:0)+(R>0&&/water|drain/i.test(c.c)?12:0)));
+const col=n=>n>=70?"#dc2626":n>=50?"#f97316":"#0e7490";
+const sla=c=>c.sev>=4?24:72,od=c=>c.st!=="Resolved"&&c.age>sla(c);
+const open=()=>D.filter(c=>c.st!=="Resolved"),near=c=>SITES.some(p=>Math.abs(p[0]-c.la)<.003&&Math.abs(p[1]-c.lo)<.003);
+function landNums(){[["c1",open().length],["c2",open().filter(c=>sc(c)>=70).length],["c3",D.length-open().length]].forEach(x=>{const e=$("#"+x[0]);e.dataset.n=x[1];if(e.closest(".rv").classList.contains("in"))e.textContent=x[1]})}landNums();
+
+/* maps (guarded: the rest of the app works even if the map library fails) */
+const V="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",DK="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",SA="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",AT='&copy; OpenStreetMap contributors &copy; CARTO';
+const tl=()=>({"Map":L.tileLayer(V,{attribution:AT,maxZoom:19}),"Satellite":L.tileLayer(SA,{attribution:"Tiles &copy; Esri",maxZoom:19}),"Dark":L.tileLayer(DK,{attribution:AT,maxZoom:19})});
+try{mp=L.map("mp").setView([13.03,80.23],11);const B=tl();B.Map.addTo(mp);heat=L.layerGroup().addTo(mp);pins=L.layerGroup().addTo(mp);sites=L.layerGroup();L.control.layers(B,{"Heat zones":heat,"Complaints":pins,"Hospitals and schools":sites},{collapsed:false}).addTo(mp)}catch(e){mp=null;$("#mp").innerHTML='<div class="m" style="padding:20px">The map could not load. Check your internet connection and reload. Everything else still works.</div>'}
+function initRm(){if(rm)return rm.invalidateSize();try{rm=L.map("rm").setView([13.03,80.23],11);tl().Map.addTo(rm);rm.on("click",e=>setLoc(e.latlng.lat,e.latlng.lng))}catch(e){rm=null;$("#rm").innerHTML='<div class="m" style="padding:16px">Map unavailable. Use "Use my location" or choose an area.</div>'}}
+async function setLoc(la,lo,name){loc={la,lo,an:name||la.toFixed(4)+", "+lo.toFixed(4)};if(rm){if(rmk)rmk.setLatLng([la,lo]);else rmk=L.marker([la,lo]).addTo(rm);rm.setView([la,lo],15)}$("#ad").textContent=name||"Finding address…";
+if(!name){try{const r=await(await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${la}&lon=${lo}`)).json();loc.an=r.display_name.split(",").slice(0,2).join(",")}catch(e){}$("#ad").textContent=loc.an}ready()}
+$("#ls").innerHTML+=AR.map((a,i)=>`<option value="${i}">${a[0]}</option>`).join("");$("#ls").onchange=e=>{const a=AR[e.target.value];if(a)setLoc(a[1],a[2],a[0])};
+$("#gl").onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>setLoc(p.coords.latitude,p.coords.longitude),()=>toast("Location blocked. Choose an area instead.")):toast("Choose an area instead.");
+
+/* render */
+function render(first){const o=open(),r=D.length-o.length,k=[["Open complaints",o.length,""],["Resolved",r,""],["Critical now",o.filter(c=>sc(c)>=70).length,""],["SLA breached",o.filter(od).length,""],["Resolution rate",Math.round(r/D.length*100),"%"]];
+$("#kp").innerHTML=k.map((x,i)=>`<div class="c k"><b id="k${i}">${first?0:x[1]+x[2]}</b><span>${x[0]}</span></div>`).join("");if(first)k.forEach((x,i)=>count($("#k"+i),x[1],x[2]));
+if(mp){const f=$("#cf").value,L1=o.filter(c=>f==="All issues"||c.c===f);heat.clearLayers();pins.clearLayers();mrk={};
+L1.forEach(c=>{L.circle([c.la,c.lo],{radius:300+sc(c)*5,stroke:false,fillColor:"#f97316",fillOpacity:.13,interactive:false}).addTo(heat);
+mrk[c.id]=L.circleMarker([c.la,c.lo],{radius:8,color:"#fff",weight:2,fillColor:col(sc(c)),fillOpacity:1}).bindPopup(`<b>${CT[c.c][0]} ${c.c}</b> #${c.id}<br>${c.an}<br>Priority ${sc(c)} · ${c.v} votes · ${c.age}h old<br>${CT[c.c][1]} · ${c.st}<br><button onclick="vote(${c.id})" style="margin-top:6px">Upvote</button>`).addTo(pins)})}
+queue();board();landNums()}
+function queue(){const q=$("#sq").value.toLowerCase(),f=$("#sf").value;
+$("#qu").innerHTML=D.filter(c=>(f==="All"?c.st!=="Resolved":c.st===f)&&(c.c+c.an).toLowerCase().includes(q)).sort((a,b)=>sc(b)-sc(a)).slice(0,15).map(c=>`<div class="it" data-f="${c.id}"><div class="t"><span>${CT[c.c][0]} ${c.c} · ${c.an}</span><span class="sc" style="background:${col(sc(c))}">${sc(c)}</span></div><div class="m">#${c.id} · ${c.v} votes · ${c.age}h · ${CT[c.c][1]}${c.near?" · near a school or hospital":""}</div><div class="fl" style="justify-content:space-between"><span><span class="tag">${c.st}</span> ${od(c)?'<span class="tag r">SLA breached</span>':""}</span><span class="fl"><button class="bt l" data-v="${c.id}">Upvote</button>${c.st!=="Resolved"?`<button class="bt" data-m="${c.id}">Mark ${ST[ST.indexOf(c.st)+1]}</button>`:""}</span></div></div>`).join("")||'<span class="m">Nothing matches. Clear the search or filter.</span>';
+$$("[data-f]").forEach(e=>e.onclick=()=>{const c=D.find(x=>x.id==e.dataset.f);if(mp){mp.flyTo([c.la,c.lo],16);setTimeout(()=>mrk[c.id]&&mrk[c.id].openPopup(),800)}});
+$$("[data-v]").forEach(b=>b.onclick=e=>{e.stopPropagation();vote(+b.dataset.v)});
+$$("[data-m]").forEach(b=>b.onclick=e=>{e.stopPropagation();const c=D.find(x=>x.id==b.dataset.m);c.st=ST[ST.indexOf(c.st)+1];log.unshift(`#${c.id} ${c.c} in ${c.an} moved to ${c.st}`);toast(`#${c.id} is now ${c.st}`);render()})}
+function vote(i){D.find(x=>x.id===i).v++;toast("Vote counted. Priority updated.");render()}
+function board(){const dp=[...new Set(Object.values(CT).map(v=>v[1]))];
+$("#lb").innerHTML=dp.map(d=>{const L=D.filter(c=>CT[c.c][1]===d),r=L.filter(c=>c.st==="Resolved").length;return`<div><div class="row" style="border:0;padding:0"><b>${d}</b><span class="m">${r} of ${L.length} resolved</span></div><div class="bar"><i style="width:${Math.round(r/L.length*100)}%"></i></div></div>`}).join("");
+$("#mx").innerHTML=K.map(k=>{const n=D.filter(c=>c.c===k).length;return`<div><div class="row" style="border:0;padding:0"><span>${CT[k][0]} ${k}</span><b>${n}</b></div><div class="bar"><i style="width:${Math.round(n/D.length*250)}%"></i></div></div>`}).join("");
+const m={};open().forEach(c=>m[c.an]=(m[c.an]||0)+1);const tp=Object.entries(m).sort((a,b)=>b[1]-a[1]).slice(0,6);
+$("#hw").innerHTML=tp.map(x=>`<div><div class="row" style="border:0;padding:0"><span>${x[0]}</span><b>${x[1]} open</b></div><div class="bar"><i style="width:${Math.round(x[1]/tp[0][1]*100)}%"></i></div></div>`).join("");
+if(log.length)$("#tl").innerHTML=log.slice(0,10).map(l=>`<div>${l}</div>`).join("")}
+$("#cf").innerHTML=["All issues",...K].map(c=>`<option>${c}</option>`).join("");$("#cf").onchange=()=>render();$("#sq").oninput=queue;$("#sf").onchange=queue;
+$("#ex").onclick=()=>{const t="id,issue,area,lat,lng,severity,votes,age_h,status,priority\n"+D.map(c=>[c.id,c.c,'"'+c.an+'"',c.la.toFixed(5),c.lo.toFixed(5),c.sev,c.v,c.age,c.st,sc(c)].join(",")).join("\n"),a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/csv"}));a.download="civiclens-complaints.csv";a.click()};
+$("#tb").onclick=()=>{const c=D.find(x=>x.id==$("#ti").value.trim());$("#tr").innerHTML=c?`<b>${CT[c.c][0]} ${c.c}, ${c.an}</b><div class="tl" style="margin-top:8px">${ST.map((x,i)=>`<div style="color:${i<=ST.indexOf(c.st)?"var(--ok)":"var(--mu)"}">${i<=ST.indexOf(c.st)?"✔":"○"} ${x}</div>`).join("")}</div>`:"No ticket with that number."};
+
+/* report */
+function ready(){$("#sb").disabled=!(cur&&loc)}
+async function aiAnalyse(f){const im=await createImageBitmap(f),k=Math.min(1,800/Math.max(im.width,im.height)),cv=document.createElement("canvas");cv.width=im.width*k;cv.height=im.height*k;cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+const r=await fetch("/api/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:cv.toDataURL("image/jpeg",.8).split(",")[1],categories:K})});if(!r.ok)throw 0;return r.json()}
+$("#fi").onchange=async e=>{const f=e.target.files[0];if(!f)return;
+$("#ph").innerHTML=`<img alt="Uploaded issue" src="${URL.createObjectURL(f)}">`;$("#dp").classList.add("scanning");$("#rs").innerHTML='<span class="m">Analysing image…</span>';cur=null;ready();
+let a,live=true;try{a=await aiAnalyse(f)}catch(x){live=false;await new Promise(r=>setTimeout(r,1400));const n=f.name.toLowerCase();a={civic:true,issue:K.find(y=>n.includes(y.split(" ").pop().toLowerCase().slice(0,5)))||K[(f.size+n.length)%6],severity:2+f.size%4,confidence:88+f.size%11,summary:"Demo classifier result."}}
+$("#dp").classList.remove("scanning");
+if(!a.civic){$("#rs").innerHTML='<b>No civic issue found in this photo.</b><div class="m">Try a clear photo of a pothole, garbage, flooding, a dark streetlight, a broken drain or illegal dumping.</div>';return}
+const c=K.includes(a.issue)?a.issue:K[0],sev=Math.min(5,Math.max(1,+a.severity||3)),dup=open().filter(x=>x.c===c).length;cur={c,sev};
+$("#rs").innerHTML=[["Issue detected",CT[c][0]+" "+c],["Confidence",Math.round(a.confidence)+"%"],["Severity",sev+" of 5"],["Routed to",CT[c][1]+" department"],["Open "+c.toLowerCase()+" tickets citywide",dup],["Target fix time",sla({sev})+" hours"],["What the AI sees",a.summary]].map(r=>`<div class="row"><span class="m">${r[0]}</span><b style="text-align:right">${r[1]}</b></div>`).join("")+`<span class="tag" style="margin-top:8px;display:inline-block">${live?"Analysed live by Gemini vision":"Demo classifier"}</span>`;ready()};
+$("#sb").onclick=()=>{const c=mk(loc.an,loc.la,loc.lo,cur.c,cur.sev,1,0,"New");c.near=near(c);D.push(c);log.unshift(`#${c.id} ${c.c} in ${c.an} reported by a citizen`);
+toast(`Complaint #${c.id} filed. Priority ${sc(c)}.`);cur=null;$("#sb").disabled=true;$("#ph").innerHTML="Tap to add another photo";$("#rs").innerHTML=`<span class="m">Filed as #${c.id}.</span>`;render();tab("d");setTimeout(()=>{if(mp){mp.flyTo([c.la,c.lo],16);setTimeout(()=>mrk[c.id]&&mrk[c.id].openPopup(),800)}},300)};
+
+/* live open data */
+fetch("https://api.open-meteo.com/v1/forecast?latitude=13.08&longitude=80.27&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m&hourly=precipitation&forecast_days=1").then(r=>r.json()).then(j=>{const c=j.current,fr=j.hourly.precipitation.reduce((a,b)=>a+b,0);R=c.precipitation>0||fr>10?1:0;$("#wx").textContent=`Chennai now: ${c.temperature_2m}°C, ${c.relative_humidity_2m}% humidity, ${c.precipitation} mm rain now, ${fr.toFixed(1)} mm expected today${R?" (drain priority boosted)":""}`;render()}).catch(()=>$("#wx").textContent="Weather unavailable");
+fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent('[out:json][timeout:25];nwr["amenity"~"^(hospital|school)$"](12.88,80.07,13.15,80.34);out center 400;')}).then(r=>r.json()).then(j=>{j.elements.forEach(e=>{const la=e.lat||e.center&&e.center.lat,lo=e.lon||e.center&&e.center.lon;if(!la)return;SITES.push([la,lo]);if(sites)L.circleMarker([la,lo],{radius:5,color:e.tags.amenity==="hospital"?"#dc2626":"#7c3aed",weight:1,fillOpacity:.8}).bindTooltip((e.tags.name||e.tags.amenity)+" ("+e.tags.amenity+")").addTo(sites)});
+D.forEach(c=>c.near=near(c));render()}).catch(()=>{});
+route();
+</script></body></html>
